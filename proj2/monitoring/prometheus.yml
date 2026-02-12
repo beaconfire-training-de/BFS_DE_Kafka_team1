@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Kafka metrics
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+
+  # PostgreSQL source DB metrics
+  - job_name: 'postgres-source'
+    static_configs:
+      - targets: ['postgres-exporter-source:9187']
+        labels:
+          database: 'source'
+
+  # PostgreSQL destination DB metrics
+  - job_name: 'postgres-destination'
+    static_configs:
+      - targets: ['postgres-exporter-dst:9187']
+        labels:
+          database: 'destination'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

@@ -1,0 +1,85 @@
+# Enhanced docker-compose with monitoring stack
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up
+
+version: '3.8'
+
+services:
+  # Prometheus - metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - monitoring
+
+  # Grafana - metrics visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+  # Kafka Exporter - expose Kafka metrics to Prometheus
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka-exporter
+    ports:
+      - "9308:9308"
+    command:
+      - '--kafka.server=kafka:9092'
+    networks:
+      - monitoring
+    depends_on:
+      - kafka
+
+  # PostgreSQL Exporter for source DB
+  postgres-exporter-source:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter-source
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@db_source:5432/postgres?sslmode=disable"
+    networks:
+      - monitoring
+    depends_on:
+      - db_source
+
+  # PostgreSQL Exporter for destination DB
+  postgres-exporter-dst:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter-dst
+    ports:
+      - "9188:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@db_dst:5432/postgres?sslmode=disable"
+    networks:
+      - monitoring
+    depends_on:
+      - db_dst
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge
