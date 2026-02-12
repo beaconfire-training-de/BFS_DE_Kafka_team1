@@ -16,6 +16,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
@@ -30,7 +31,7 @@ services:
     command: |
       bash -c "
         echo 'Waiting for Kafka...'
-        sleep 10
+        sleep 20
         
         echo 'Creating topics...'
         kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --partitions 3 --replication-factor 1 --topic bf_employee_cdc
@@ -50,7 +51,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - db_source:/var/lib/bf_kafka_proj2_source/data
+      - db_source:/var/lib/postgresql/data
 
   db_dst:
     image: postgres:14.1-alpine
@@ -61,7 +62,7 @@ services:
     ports:
       - '5433:5432'
     volumes:
-      - db_dst:/var/lib/bf_kafka_proj2_dst/data
+      - db_dst:/var/lib/postgresql/data
 
 volumes:
   db_source:

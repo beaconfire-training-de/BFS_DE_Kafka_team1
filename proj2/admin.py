@@ -50,9 +50,9 @@ class cdcClient(AdminClient):
 if __name__ == '__main__':
     client = cdcClient()
     employee_topic_name = "bf_employee_cdc"
-    num_parition = 3
+    num_partition = 3
     if client.topic_exists(employee_topic_name):
         client.delete_topic([employee_topic_name])
     else:
-        client.create_topic(employee_topic_name, num_parition)
+        client.create_topic(employee_topic_name, num_partition)
     
