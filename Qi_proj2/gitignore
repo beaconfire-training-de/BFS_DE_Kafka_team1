@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Offset tracking (local state)
+cdc_offset.json
+
+# Docker volumes (data)
+postgres_source_data/
+postgres_dest_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test files (optional)
+test_*.py
+diagnose_*.sh
+load_sample_data.py
